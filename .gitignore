@@ -1,0 +1,9 @@
+# Executables
+
+*.exe
+./main
+./rbproxy
+
+#Certs
+*.crt
+*.pem

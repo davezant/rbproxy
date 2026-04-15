@@ -6,6 +6,4 @@ type File struct {
 	WhenCreated string
 	Metadata map[string]string
 }
-func CheckFileForInjections (){
 
-}

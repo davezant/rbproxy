@@ -1,6 +1,5 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2026 RBProxy
 */
 package cmd
 
@@ -10,31 +9,57 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// activismCmd represents the activism command
 var activismCmd = &cobra.Command{
 	Use:   "activism",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Support information for victims of the Israel-Palestine conflict",
+	Long:  `Provides a list of international organizations and humanitarian aid groups working to help civilians affected by the conflict.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("activism called")
+		showSupportInfo()
 	},
+}
+
+func showSupportInfo() {
+	fmt.Println(`
+============================================================
+       HUMANITARIAN SUPPORT: ISRAEL-PALESTINE CONFLICT
+============================================================
+
+The following organizations provide neutral medical aid, 
+food, and shelter to civilians affected by the ongoing 
+hostilities.
+
+1. International Committee of the Red Cross (ICRC)
+   Description: Provides emergency medical services and 
+   seeks to ensure protection for civilians.
+   Link: https://www.icrc.org/
+
+2. Doctors Without Borders (MSF)
+   Description: Delivers urgent medical care and surgical 
+   support in affected areas.
+   Link: https://www.msf.org/
+
+3. UNRWA (United Nations Relief and Works Agency)
+   Description: Specialized in providing food and healthcare 
+   specifically to Palestinian refugees.
+   Link: https://www.unrwa.org/
+
+4. Magen David Adom (MDA)
+   Description: Israel's national emergency medical, 
+   disaster, ambulance and blood bank service.
+   Link: https://www.mdais.org/en
+
+5. Save the Children
+   Description: Focuses on the protection and psychological 
+   support of children on both sides of the conflict.
+   Link: https://www.savethechildren.net/
+
+------------------------------------------------------------
+Note: Always verify the organization's transparency and 
+current status before making any donations.
+============================================================
+`)
 }
 
 func init() {
 	rootCmd.AddCommand(activismCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// activismCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// activismCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

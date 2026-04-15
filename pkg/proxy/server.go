@@ -4,15 +4,34 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io"
-	"log"
 	"net"
 	"rbproxy/pkg/terminal"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
+
+type MissingPermissionsForPortForwarding string
+func (e MissingPermissionsForPortForwarding) Error() string {
+	return "[rbproxy] ERR: Hosting for the current port needs superuser permissions " + string(e)
+}
+
+type InvalidAddressForProxyAccess string
+func (e InvalidAddressForProxyAccess) Error() string {
+	return "[rbproxy] ERR : Invalid address!  " + string(e)
+}
+
+type PortIsAlreadyBeingUsed string
+func (e PortIsAlreadyBeingUsed) Error() string {
+	return "[rbproxy] ERR: Current port is already being used " + string(e)
+}
+
+type Relatory struct {
+	StrangeInputs int
+	MaliciousAttempts int
+}
 
 type PortConfig struct {
 //	Info
@@ -23,7 +42,6 @@ type PortConfig struct {
 
 //	Limiters
 	SpecificLimitBytes int
-	FakePaths map[string]FakePath
 	GeneralRateLimiter int // ALL
 	ExclusiveRateLimiter int // IP Based
 // 	Functions 
@@ -168,7 +186,7 @@ func NewProxy(cfg *ProxyConfig, ports []PortConfig) Proxy {
 func (p *Proxy) SetCertificateHTTPS(certFile, keyFile string) {
     cert, err := tls.LoadX509KeyPair(certFile, keyFile)
     if err != nil {
-        log.Fatalf("Erro ao carregar certificados: %v", err)
+		terminal.RaiseError(err)
     }
 
     p.TLSConfig = tls.Config{
@@ -179,7 +197,7 @@ func (p *Proxy) SetCertificateHTTPS(certFile, keyFile string) {
 }
 
 func (p *Proxy) Start(){
-	fmt.Printf("Starting RBProxy %s\n",terminal.Version)
+	fmt.Printf("[rbproxy] Starting proxy service - %s\n",terminal.Version)
 	for n := range p.ListenedPorts{
 		go p.ListenAndRedirect(p.ListenedPorts[n])
 	}
@@ -189,8 +207,8 @@ func (p *Proxy) Start(){
 func (p *Proxy) ListenAndRedirect(port PortConfig){
 	var listener net.Listener
 	var err error
-	
-	fmt.Printf("Listening for %s to %s\n",port.TargetAddress, port.ProxyAddress)
+	CallTillPing(p, port)
+	fmt.Printf("[rbproxy] Listening for %s to %s\n",port.TargetAddress, port.ProxyAddress)
 	
 	if !port.Protected {
 		listener, err = net.Listen(port.Network, port.ProxyAddress)
@@ -199,77 +217,76 @@ func (p *Proxy) ListenAndRedirect(port PortConfig){
 	}
 	
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
 
 	go func(){
 		for {
-    conn, err := listener.Accept()
-    if err != nil {
-        log.Println(err)
-        continue
-    }
+    		conn, err := listener.Accept()
+    		if err != nil {
+				terminal.RaiseFatal(err)
+        		continue
+    		}
+ 
+		go func(c net.Conn) {
+	        defer c.Close()
 
-    // Use goroutine para não travar o servidor
-    go func(c net.Conn) {
-        defer c.Close()
-
-        var isRedirectNeeded bool
-        var redirectBuffer []byte
+	        var isRedirectNeeded bool
+	        var redirectBuffer []byte
     	
-		requestBuffer := p.CaptureClientRequest(c, port)
+			requestBuffer := p.CaptureClientRequest(c, port)
         
-        if port.OnRequest != nil {
-            requestBuffer, redirectBuffer, isRedirectNeeded = port.OnRequest(&requestBuffer)
+	        if port.OnRequest != nil {
+	            requestBuffer, redirectBuffer, isRedirectNeeded = port.OnRequest(&requestBuffer)
 
-			if len(port.ClientFunctions) >= 1 {
-				for _, fn := range port.ClientFunctions{
-					requestBuffer, redirectBuffer, isRedirectNeeded = fn(&requestBuffer)
-					if isRedirectNeeded {
-						break
-					}
-				}
-			}
-        }
-
-        var responseBuffer []byte
-        
-        if !isRedirectNeeded {
-            responseBuffer = p.ForwardToTarget(requestBuffer, port)
-            if port.OnResponse != nil {
-                var isResponseRedirectNeeded bool
-                var resBuffer []byte
-                responseBuffer, resBuffer, isResponseRedirectNeeded = port.OnResponse(&responseBuffer)
-                
-				if len(port.ServerFunctions) >= 1 {
+				if len(port.ClientFunctions) >= 1 {
 					for _, fn := range port.ClientFunctions{
-						responseBuffer, resBuffer, isResponseRedirectNeeded = fn(&requestBuffer)
-						if isResponseRedirectNeeded {
+						requestBuffer, redirectBuffer, isRedirectNeeded = fn(&requestBuffer)
+						if isRedirectNeeded {
 							break
 						}
 					}
 				}
-                if isResponseRedirectNeeded {
-                    isRedirectNeeded = true
-                    redirectBuffer = resBuffer
-                }
-            }
-        }
-
-        if isRedirectNeeded {
-			fmt.Println(c.RemoteAddr().String())
-            fmt.Println("Fake Path")
-            c.Write(redirectBuffer)
-        } else {
-            fmt.Println("Real Response")
-            c.Write(responseBuffer)
-        }
-
-        if port.OnClose != nil {
-            port.OnClose(c)
-        }
-    }(conn)
-}
+	        }
+	
+	        var responseBuffer []byte
+	        
+	        if !isRedirectNeeded {
+	            responseBuffer = p.ForwardToTarget(requestBuffer, port)
+	            if port.OnResponse != nil {
+	                var isResponseRedirectNeeded bool
+	                var resBuffer []byte
+	                responseBuffer, resBuffer, isResponseRedirectNeeded = port.OnResponse(&responseBuffer)
+                
+					if len(port.ServerFunctions) >= 1 {
+						for _, fn := range port.ClientFunctions{
+							responseBuffer, resBuffer, isResponseRedirectNeeded = fn(&requestBuffer)
+							if isResponseRedirectNeeded {
+								break
+							}
+						}
+					}
+	                if isResponseRedirectNeeded {
+	                    isRedirectNeeded = true
+	                    redirectBuffer = resBuffer
+	                }
+	            }
+	        }
+	
+	        if isRedirectNeeded {
+				if p.Configs.Verbose{
+					fmt.Println("[rbproxy] Handling Redirection to ", c.RemoteAddr().String())
+				}
+				c.Write(redirectBuffer)
+	        } else {
+	            c.Write(responseBuffer)
+	        }
+	
+	        if port.OnClose != nil {
+	            port.OnClose(c)
+		    }
+		}(conn)
+		}
 	}()
 	p.netListeners = append(p.netListeners, &listener)
 }
@@ -288,7 +305,7 @@ func (p *Proxy) CaptureClientRequest(conn net.Conn, port PortConfig) []byte {
 
 	if p.Configs.Verbose {
 		rq := string(requestBuffer)
-		fmt.Println(rq)
+		fmt.Println("[rbproxy]",rq)
 	}
 
 	return requestBuffer[:n]
@@ -309,15 +326,46 @@ func (p *Proxy) ForwardToTarget(requestPacket []byte, port PortConfig) []byte {
 
     _, err = io.Copy(&responseBuffer, c)
     if err != nil && err != io.EOF {
-        log.Println(err)
+		log.Println("[rbproxy] ERR:",err)
     }
 
 	if p.Configs.Verbose {
 		rp := responseBuffer.String()
-		fmt.Println(rp)
+		fmt.Println("[rbproxy]",rp)
 	}
 	
 	return responseBuffer.Bytes()
 }
 
+func CallTillPing(proxy *Proxy, port PortConfig) bool {
+    repetitions := 0
+    timeout := 5 * time.Second
 
+    for repetitions <= 9 {
+        fmt.Printf("[rbproxy] Attempt %d: Waiting for %s...\n", repetitions+1, port.TargetAddress)
+
+        var c net.Conn
+        var err error
+
+        dialer := net.Dialer{Timeout: timeout}
+        if !port.Protected {
+            c, err = dialer.Dial(port.Network, port.TargetAddress)
+        } else {
+            c, err = tls.Dial(port.Network, port.TargetAddress, &proxy.TLSConfig)
+        }
+
+        if err != nil {
+            fmt.Println("[rbproxy] Target not reachable:", err)
+        } else {
+            c.Close()
+            fmt.Println("[rbproxy] Found Server:", port.TargetAddress)
+            return true
+        }
+
+        time.Sleep(2 * time.Second)  
+		repetitions++
+    }
+
+	terminal.PrintLog("Failed to reach target after max attempts.")
+    return false
+}

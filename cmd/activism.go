@@ -19,7 +19,7 @@ var activismCmd = &cobra.Command{
 }
 
 func showSupportInfo() {
-	fmt.Println(`
+	fmt.Print(`
 ============================================================
        HUMANITARIAN SUPPORT: ISRAEL-PALESTINE CONFLICT
 ============================================================

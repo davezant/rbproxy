@@ -1,0 +1,16 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+ <head>
+  <title>Index of {{.Path}}</title>
+ </head>
+ <body>
+<h1>Index of {{.Path}}</h1>
+  <table>
+   <tr><th valign="top">&nbsp;</th><th><a href="?C=N;O=D">Name</a></th><th><a href="?C=M;O=A">Last modified</a></th><th><a href="?C=S;O=A">Size</a></th></tr>
+   <tr><th colspan="4"><hr></th></tr>
+<tr><td valign="top">&nbsp;</td><td><a href="../">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td></tr>
+{{range .Entries}}<tr><td valign="top">&nbsp;</td><td><a href="{{.Name}}">{{.Name}}</a></td><td align="right">{{.Date}}  </td><td align="right">{{.Size}}</td></tr>
+{{end}}   <tr><th colspan="4"><hr></th></tr>
+</table>
+<address>Apache/2.4.41 (Ubuntu) Server at {{.Host}} Port 80</address>
+</body></html>

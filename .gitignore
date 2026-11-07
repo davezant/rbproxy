@@ -1,9 +1,13 @@
 # Executables
-
 *.exe
-./main
-./rbproxy
+/main
+/rbproxy
 
-#Certs
+# Certs
 *.crt
 *.pem
+*.key
+
+# Runtime data
+rbproxy-events.jsonl
+*.jsonl

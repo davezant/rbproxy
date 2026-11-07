@@ -1,0 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html><head>
+<title>Apache Status</title>
+</head><body>
+<h1>Apache Server Status for {{.Host}} (via 10.0.12.4)</h1>
+<dl><dt>Server Version: Apache/2.4.41 (Ubuntu) OpenSSL/1.1.1f</dt>
+<dt>Server MPM: prefork</dt>
+<dt>Server Built: 2023-03-01T21:26:42</dt>
+</dl><hr /><dl>
+<dt>Current Time: {{.Now}}</dt>
+<dt>Server uptime: {{.Uptime}}</dt>
+<dt>Server load: 0.42 0.38 0.35</dt>
+<dt>12 requests currently being processed, 8 idle workers</dt>
+</dl>
+<table border="0"><tr><th>Srv</th><th>PID</th><th>M</th><th>Client</th><th>VHost</th><th>Request</th></tr>
+<tr><td><b>0-0</b></td><td>21877</td><td><b>W</b></td><td>10.0.3.14</td><td nowrap>{{.Host}}:443</td><td nowrap>GET /admin/export?format=csv HTTP/1.1</td></tr>
+<tr><td><b>1-0</b></td><td>21878</td><td><b>K</b></td><td>10.0.3.14</td><td nowrap>{{.Host}}:443</td><td nowrap>GET /api/v1/reports?api_key={{.Secrets.APIKey}} HTTP/1.1</td></tr>
+<tr><td><b>2-0</b></td><td>21880</td><td><b>_</b></td><td>10.0.3.22</td><td nowrap>{{.Host}}:443</td><td nowrap>GET /backup/db.zip HTTP/1.1</td></tr>
+<tr><td><b>3-0</b></td><td>21881</td><td><b>W</b></td><td>127.0.0.1</td><td nowrap>localhost:80</td><td nowrap>GET /server-status HTTP/1.1</td></tr>
+</table>
+<hr /><address>Apache/2.4.41 (Ubuntu) Server at {{.Host}} Port 443</address>
+</body></html>

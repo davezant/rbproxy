@@ -1,6 +1,5 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2026 RBProxy
 */
 package cmd
 
@@ -8,31 +7,33 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"rbproxy/pkg/terminal"
 )
 
-
-
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "rbproxy",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "Reverse proxy that detects attacks, profiles clients and grows its own honeypots",
+	Long: `RBProxy sits in front of a web application and watches every request.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+  • Detects attack payloads (SQLi, XSS, command injection, traversal, SSTI,
+    Log4Shell, XXE, SSRF...) and leaks in the backend's responses.
+  • Profiles every client: request rate, 404 enumeration, brute force,
+    scanner user agents. Scores decay over time; high scores get throttled,
+    blocked, and eventually blacklisted.
+  • Answers probes with honeypots: fake .env, .git, phpMyAdmin, WordPress,
+    database dumps... filled with canary credentials unique to each client.
+    When a canary comes back, the thief is identified across IPs. Paths that
+    several suspicious clients probe become new traps on their own.
+
+Start with:  rbproxy host --target http://127.0.0.1:3000`,
+	Version:       terminal.Version,
+	SilenceUsage:  true,
+	SilenceErrors: false,
 }
 
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
-
-func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-

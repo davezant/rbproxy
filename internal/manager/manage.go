@@ -1,5 +1,5 @@
 package manager
 
-func CreateNewProxyProcess(){
+func CreateNewProxyProcess() {
 
 }

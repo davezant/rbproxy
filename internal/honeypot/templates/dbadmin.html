@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<title>phpMyAdmin</title>
+<style>
+body{font-family:sans-serif;background:#fff;color:#444;font-size:13px}
+.container{width:420px;margin:60px auto}
+fieldset{border:1px solid #aaa;border-radius:4px;padding:1.5em;background:#eee}
+legend{font-weight:bold;font-size:1.2em}
+label{display:inline-block;width:8em}
+input[type=text],input[type=password]{width:14em;padding:.3em}
+.error{border:1px solid #c00;background:#fcc;color:#c00;padding:.5em 1em;margin-bottom:1em}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Welcome to phpMyAdmin</h1>
+{{if .Error}}<div class="error">mysqli::real_connect(): (HY000/1045): Access denied for user '{{.Username}}'@'localhost' (using password: YES)<br>Cannot log in to the MySQL server</div>{{end}}
+<form method="post" action="{{.Path}}" name="login_form" autocomplete="off">
+<fieldset>
+<legend>Log in</legend>
+<p><label for="input_username">Username:</label> <input type="text" name="pma_username" id="input_username" value="{{.Username}}" autocomplete="username"></p>
+<p><label for="input_password">Password:</label> <input type="password" name="pma_password" id="input_password" value="" autocomplete="current-password"></p>
+<p><label for="select_server">Server:</label> <input type="text" name="pma_servername" id="select_server" value="localhost"></p>
+<input type="hidden" name="server" value="1">
+<input type="hidden" name="token" value="{{printf "%.32s" "5f4dcc3b5aa765d61d8327deb882cf99"}}">
+<p><input value="Go" type="submit" id="input_go"></p>
+</fieldset>
+</form>
+</div>
+</body>
+</html>

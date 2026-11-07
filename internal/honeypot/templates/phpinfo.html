@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<style type="text/css">
+body {background-color: #fff; color: #222; font-family: sans-serif;}
+table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px #ccc;}
+.center {text-align: center;} .center table {margin: 1em auto; text-align: left;}
+td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}
+.h {background-color: #99c; font-weight: bold;} .e {background-color: #ccf; width: 300px; font-weight: bold;} .v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}
+</style>
+<title>PHP 7.4.33 - phpinfo()</title><meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" /></head>
+<body><div class="center">
+<table><tr class="h"><td><h1 class="p">PHP Version 7.4.33</h1></td></tr></table>
+<table>
+<tr><td class="e">System </td><td class="v">Linux web-prod-02 5.4.0-150-generic #167-Ubuntu SMP Mon May 15 17:35:05 UTC 2023 x86_64 </td></tr>
+<tr><td class="e">Server API </td><td class="v">Apache 2.0 Handler </td></tr>
+<tr><td class="e">Loaded Configuration File </td><td class="v">/etc/php/7.4/apache2/php.ini </td></tr>
+<tr><td class="e">allow_url_include </td><td class="v">On </td></tr>
+<tr><td class="e">disable_functions </td><td class="v"><i>no value</i> </td></tr>
+</table>
+<h2>Environment</h2>
+<table>
+<tr class="h"><th>Variable</th><th>Value</th></tr>
+<tr><td class="e">HOSTNAME </td><td class="v">web-prod-02 </td></tr>
+<tr><td class="e">DB_HOST </td><td class="v">10.0.12.7 </td></tr>
+<tr><td class="e">DB_USERNAME </td><td class="v">{{.Secrets.DBUser}} </td></tr>
+<tr><td class="e">DB_PASSWORD </td><td class="v">{{.Secrets.DBPassword}} </td></tr>
+<tr><td class="e">AWS_ACCESS_KEY_ID </td><td class="v">{{.Secrets.AWSAccessKey}} </td></tr>
+</table>
+<h2>Apache Environment</h2>
+<table>
+<tr class="h"><th>Variable</th><th>Value</th></tr>
+<tr><td class="e">SERVER_NAME </td><td class="v">{{.Host}} </td></tr>
+<tr><td class="e">SERVER_SOFTWARE </td><td class="v">Apache/2.4.41 (Ubuntu) </td></tr>
+<tr><td class="e">DOCUMENT_ROOT </td><td class="v">/var/www/html </td></tr>
+<tr><td class="e">SERVER_ADMIN </td><td class="v">webmaster@{{.Host}} </td></tr>
+</table>
+</div></body></html>
